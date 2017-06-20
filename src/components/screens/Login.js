@@ -64,16 +64,17 @@ class Login extends Component {
             <View style={style.wrapter}>
                 <Text> Login screen </Text>
                 <TextInput
-                    style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
+                    style={{ height: 40, borderColor: 'gray', borderWidth: 1, padding: 5, marginTop: 20 }}
                     onChangeText={(username) => this.setState({ username })}
                     value={this.state.username}
                     placeholder='Username'
                 />
                 <TextInput
-                    style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
+                    style={{ height: 40, borderColor: 'gray', borderWidth: 1, marginTop: 15, padding: 5 }}
                     onChangeText={(passwd) => this.setState({ passwd })}
                     value={this.state.passwd}
                     secureTextEntry
+                    placeholder='Password'
                 />
                 <TouchableOpacity
                     onPress={this.onLogin}
@@ -98,6 +99,9 @@ class Login extends Component {
 const style = StyleSheet.create({
     wrapter: {
         flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 20
 
     }
 

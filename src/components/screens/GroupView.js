@@ -29,24 +29,24 @@ class GroupView extends Component {
         this.setState({ loading: true });
         setTimeout(() => {
             fetch(url, {
-            method: 'GET',
-            headers: {
-                'Authorization': this.props.auth.user.token
-            }
-        })
-            .then(res => res.json())
-            .then(res => {
-                this.setState({
-                    data: page === 1 ? res : [...this.state.data, ...res],
-                    error: res.error || null,
-                    loading: false,
-                    refreshing: false
-                });
+                method: 'GET',
+                headers: {
+                    'Authorization': this.props.auth.user.token
+                }
             })
-            .catch(error => {
-                this.setState({ error, loading: false });
-            });
-        }, 1500); 
+                .then(res => res.json())
+                .then(res => {
+                    this.setState({
+                        data: page === 1 ? res : [...this.state.data, ...res],
+                        error: res.error || null,
+                        loading: false,
+                        refreshing: false
+                    });
+                })
+                .catch(error => {
+                    this.setState({ error, loading: false });
+                });
+        }, 1500);
     };
 
     handleRefresh = () => {
@@ -62,14 +62,17 @@ class GroupView extends Component {
     };
 
     handleLoadMore = () => {
-        this.setState(
-            {
-                page: this.state.page + 1
-            },
-            () => {
-                this.makeRemoteRequest();
-            }
-        );
+        if (!this.state.loading) {
+            this.setState(
+                {
+                    page: this.state.page + 1,
+                    loading: true
+                },
+                () => {
+                    this.makeRemoteRequest();
+                }
+            );
+        }
     };
 
     sendComment = () => {
@@ -117,7 +120,7 @@ class GroupView extends Component {
                     onRefresh={this.handleRefresh}
                     refreshing={this.state.refreshing}
                     onEndReached={this.handleLoadMore}
-                    onEndReachedThreshold={0}
+                    onEndReachedThreshold={-0.1}
                 />
                 <View style={style.cmtview}>
                     <TextInput

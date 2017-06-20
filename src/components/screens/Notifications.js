@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, FlatList } from 'react-native';
+import { View, StyleSheet, FlatList, TouchableOpacity, Text } from 'react-native';
 import { connect } from 'react-redux';
 import DrawerButton from './DrawerButton';
 import NotificationItem from './NotificationItem';
@@ -8,6 +8,7 @@ class Notification extends Component {
     static navigationOptions = ({ navigation }) => ({
         title: 'Notification',
         headerLeft: <DrawerButton navigation={navigation} />,
+        headerRight: <TouchableOpacity onPress={() => { navigation.navigate('NewNotification'); }} style={style.btTao} ><Text style={{ color: 'blue', fontSize: 18 }}>new</Text></TouchableOpacity>,
     });
     constructor(props) {
         super(props);
@@ -120,6 +121,9 @@ const style = StyleSheet.create(
         Content: {
             flex: 1,
             backgroundColor: '#FFFFFF'
+        },
+        btTao: {
+            marginRight: 15
         }
     }
 );

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, FlatList } from 'react-native';
+import { View, StyleSheet, FlatList, TouchableOpacity, Text } from 'react-native';
 import { connect } from 'react-redux';
 import DrawerButton from './DrawerButton';
 import TopicItem from './TopicItem';
@@ -8,6 +8,7 @@ class Group extends Component {
     static navigationOptions = ({ navigation }) => ({
         title: 'Group',
         headerLeft: <DrawerButton navigation={navigation} />,
+        headerRight: <TouchableOpacity onPress={() => { navigation.navigate('NewTopic'); }} style={style.btTao} ><Text style={{ color: 'blue', fontSize: 18 }}>new</Text></TouchableOpacity>,
     });
     constructor(props) {
         super(props);
@@ -24,6 +25,12 @@ class Group extends Component {
 
     componentDidMount() {
         this.makeRemoteRequest();
+    }
+
+    newTopic = () => {
+        console.log('Newtopic');
+        this.props.navigation.navigate('NewTopic');
+        console.log('Newtopic');
     }
 
     makeRemoteRequest = () => {
@@ -115,6 +122,11 @@ const style = StyleSheet.create(
         Content: {
             flex: 1,
             backgroundColor: '#FFFFFF'
+        },
+        btTao: {
+            alignItems: 'center',
+            marginTop: 0,
+            marginRight: 15
         }
     }
 );
