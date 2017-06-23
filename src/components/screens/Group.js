@@ -35,7 +35,7 @@ class Group extends Component {
 
     makeRemoteRequest = () => {
         const { page, id } = this.state;
-        const url = `http://localhost:8080/topics/getByClass/${id}`;
+        const url = `${this.props.auth.hostname}/topics/getByClass/${id}`;
         this.setState({ loading: true });
         fetch(url, {
             method: 'GET',

@@ -1,22 +1,26 @@
-import React, { Component } from 'react';
-import { View, StyleSheet, FlatList, TouchableOpacity, Text } from 'react-native';
-import { connect } from 'react-redux';
+import React, {Component} from 'react';
+import {View, StyleSheet, FlatList, TouchableOpacity, Text} from 'react-native';
+import {connect} from 'react-redux';
 import DrawerButton from './DrawerButton';
 import NotificationItem from './NotificationItem';
 
 class Notification extends Component {
-    static navigationOptions = ({ navigation }) => ({
+    static navigationOptions = ({navigation}) => ({
         title: 'Notification',
-        headerLeft: <DrawerButton navigation={navigation} />,
-        headerRight: <TouchableOpacity onPress={() => { navigation.navigate('NewNotification'); }} style={style.btTao} ><Text style={{ color: 'blue', fontSize: 18 }}>new</Text></TouchableOpacity>,
+        headerLeft: <DrawerButton navigation={navigation}/>,
+        headerRight: <TouchableOpacity onPress={() => {
+            navigation.navigate('NewNotification');
+        }} style={style.btTao}><Text style={{color: 'blue', fontSize: 18}}>new</Text></TouchableOpacity>,
     });
+
     constructor(props) {
         super(props);
 
         this.state = {
             loading: false,
             data: [],
-            page: 1,
+            maxid: 0,
+            maxItem: 10,
             id: 1,
             error: null,
             refreshing: false,
@@ -24,15 +28,14 @@ class Notification extends Component {
     }
 
     componentDidMount() {
-        //this.makeRemoteRequest();
+        this.makeRemoteRequest();
     }
 
     makeRemoteRequest = () => {
-        const { page, maxItem } = this.state;
-        const url = 'http://192.168.42.72:8080/notifications/receivers';
-        this.setState({ loading: true });
-        setTimeout(() => {
-            fetch(url, {
+        const url = `${this.props.auth.hostname}/notifications/receivers/${this.state.maxid}&${this.state.maxItem}`;
+        this.setState({loading: true});
+
+        fetch(url, {
             method: 'GET',
             headers: {
                 'Authorization': this.props.auth.user.token
@@ -41,22 +44,22 @@ class Notification extends Component {
             .then(res => res.json())
             .then(res => {
                 this.setState({
-                    data: page === 1 ? res : [...this.state.data, ...res],
+                    data: this.state.maxid === 0 ? res : [...this.state.data, ...res],
                     error: res.error || null,
                     loading: false,
                     refreshing: false
                 });
             })
             .catch(error => {
-                this.setState({ error, loading: false });
+                this.setState({error, loading: false});
             });
-        }, 1500); 
+
     };
 
     handleRefresh = () => {
         this.setState(
             {
-                page: 1,
+                maxid: 0,
                 refreshing: true
             },
             () => {
@@ -66,9 +69,13 @@ class Notification extends Component {
     };
 
     handleLoadMore = () => {
+
+            const id = this.state.data[this.state.data.length - 1].id;
+
         this.setState(
             {
-                page: this.state.page + 1
+                maxid: id,
+                loading: true
             },
             () => {
                 this.makeRemoteRequest();
@@ -90,16 +97,16 @@ class Notification extends Component {
     };
 
     render() {
-        const { navigation } = this.props;
+        const {navigation} = this.props;
         return (
-            <View style={style.Content} >
+            <View style={style.Content}>
                 <FlatList
                     data={this.state.data}
-                    renderItem={({ item }) => (
+                    renderItem={({item}) => (
                         <NotificationItem
                             title={`${item.title}`}
                             noti={item.noti}
-                            sender={item.sender}
+                            sender={item.id}
                         />
                     )}
                     keyExtractor={item => item.id}
@@ -107,7 +114,7 @@ class Notification extends Component {
                     onRefresh={this.handleRefresh}
                     refreshing={this.state.refreshing}
                     onEndReached={this.handleLoadMore}
-                    onEndReachedThreshold={0}
+                    onEndReachedThreshold={0.2}
                 />
             </View>
         );

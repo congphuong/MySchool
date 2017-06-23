@@ -1,5 +1,5 @@
 import React from 'react';
-import { } from 'react-native';
+import { Image } from 'react-native';
 import { DrawerNavigator } from 'react-navigation';
 import ExamSchedule from './navigations/ExamSchedule';
 import Schedule from './navigations/Schedule';
@@ -12,16 +12,49 @@ const AppDrawer = DrawerNavigator({
         screen: MainTabNavigator,
         navigationOptions: {
             title: 'Home',
+            drawerIcon: ({ tintColor }) => (
+                <Image
+                    source={require('./img/home_icon.png')}
+                    style={[{tintColor: tintColor}]}
+                />
+            ),
         }
     },
     Schedule: {
         screen: Schedule,
+        navigationOptions: {
+            title: 'Schedule',
+            drawerIcon: ({ tintColor }) => (
+                <Image
+                    source={require('./img/calendar.png')}
+                    style={[{tintColor: tintColor}]}
+                />
+            ),
+        }
     },
     ExamSchedule: {
         screen: ExamSchedule,
+        navigationOptions: {
+            title: 'ExamSchedule',
+            drawerIcon: ({ tintColor }) => (
+                <Image
+                    source={require('./img/clock.png')}
+                    style={[{tintColor: tintColor}]}
+                />
+            ),
+        }
     },
     Score: {
         screen: Score,
+        navigationOptions: {
+            title: 'Home',
+            drawerIcon: ({ tintColor }) => (
+                <Image
+                    source={require('./img/score_icon.png')}
+                    style={[{tintColor: tintColor}]}
+                />
+            ),
+        }
     },
 }, {
         contentOptions: {

@@ -4,12 +4,13 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 export default class CommentItem extends Component {
     render() {
         const { wrapter, cmt, title, subline } = styles;
+        const date = new Date(this.props.time);
         return (
             <TouchableOpacity style={wrapter} >
                 <Text style={title} > {this.props.userName} </Text>
                 <Text style={cmt}> {this.props.cmt}</Text>
                 <View style={subline} >
-                    <Text style={cmt}> 22:23 - 24/4 </Text>
+                    <Text style={cmt}> {date.getHours() + ':' + date.getMinutes() + '  ' + date.getDate() + '-' + date.getMonth()} </Text>
                 </View>
             </TouchableOpacity>
         );

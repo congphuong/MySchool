@@ -22,7 +22,7 @@ class Login extends Component {
             });
 
             //login logic here
-            fetch('http://localhost:8080/auth', {
+            fetch(`${this.props.auth.hostname}/auth`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -86,7 +86,7 @@ class Login extends Component {
                     }}
                 >
                     <Text style={{ color: '#fff' }}>
-                        Login with Facebook
+                        Login
                     </Text>
                 </TouchableOpacity>
                 <Text> {this.state.error} </Text>

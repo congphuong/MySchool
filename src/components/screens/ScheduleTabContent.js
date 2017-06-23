@@ -1,32 +1,55 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, ScrollView, View } from 'react-native';
+import {connect} from 'react-redux';
 import Timeline from 'react-native-timeline-listview';
 
 
-export default class ScheduleTabContent extends Component {
-    constructor() {
-        super();
-        this.data = [
-            { time: 'tiết 1', title: 'Toan', description: 'Event 1 Description' },
-            { time: 'tiết 2', title: 'Event 2', description: 'Event 2 Description' },
-            { time: 'tiết 3', title: 'Vat Li', description: 'Event 3 Description' },
-            { time: 'tiết 4', title: 'Van', description: 'Event 4 Description' },
-            { time: 'tiết 5', title: 'Sinh hoc', description: 'Event 5 Description' },
-            { time: 'tiết 6', title: 'Event 1', description: 'Event 1 Description' },
-            { time: 'tiết 7', title: 'Event 2', description: 'Event 2 Description' },
-            { time: 'tiết 8', title: 'Event 3', description: 'Event 3 Description' },
-            { time: 'tiết 9', title: 'Event 4', description: 'Event 4 Description' },
-            { time: 'tiết 10', title: 'Event 5', description: 'Event 5 Description' }
-        ];
+class ScheduleTabContent extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            loading: false,
+            data: [],
+            page: 1,
+            id: 1,
+            error: null,
+            refreshing: false,
+        };
     }
+    componentDidMount() {
+        this.makeRemoteRequest();
+    }
+    makeRemoteRequest = () => {
+        const url = `${this.props.auth.hostname}/viewSchedule/1/1/${this.props.day}`;
+        this.setState({loading: true});
+
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': this.props.auth.user.token
+            }
+        })
+            .then(res => res.json())
+            .then(res => {
+                const data = [];
+                this.setState((state)=>{
+                    res.forEach(function(item, index, array) {
+                        data.push({time: 'tiết ' + item.lesson, title: item.nameSubject, description: item.idTeacher});
+                    });
+                    return {data}
+                });
+            })
+            .catch(error => {
+                this.setState({error, loading: false});
+            });
+
+    };
     render() {
         return (
             <ScrollView style={style.content}>
                 <View style={style.card}>
-                    <Text> {this.props.day}</Text>
-                    
                     <Timeline
-                        data={this.data}
+                        data={this.state.data}
                         titleStyle={{ marginTop: -12 }}
                         separator={false}
                         innerCircle={'dot'}
@@ -54,3 +77,7 @@ const style = StyleSheet.create(
         }
     }
 );
+const mapStateToProps = state => ({
+    auth: state.auth,
+});
+export default connect(mapStateToProps)(ScheduleTabContent);

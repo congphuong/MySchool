@@ -13,7 +13,7 @@ class GroupView extends Component {
         this.state = {
             loading: false,
             data: [],
-            page: 1,
+            offset: 0,
             maxItem: 10,
             error: null,
             refreshing: false,
@@ -25,9 +25,9 @@ class GroupView extends Component {
     }
     makeRemoteRequest = () => {
         const { page, maxItem } = this.state;
-        const url = `http://192.168.42.72:8080/comments/getCommentByTopic/${this.props.navigation.state.params.item.idTopic}/${this.state.page}/${maxItem}`;
+        const url = `${this.props.auth.hostname}/comments/getCommentByTopic/${this.props.navigation.state.params.item.idTopic}/${this.state.offset}/${maxItem}`;
         this.setState({ loading: true });
-        setTimeout(() => {
+
             fetch(url, {
                 method: 'GET',
                 headers: {
@@ -37,7 +37,7 @@ class GroupView extends Component {
                 .then(res => res.json())
                 .then(res => {
                     this.setState({
-                        data: page === 1 ? res : [...this.state.data, ...res],
+                        data: this.state.offset === 0 ? res : [...this.state.data, ...res],
                         error: res.error || null,
                         loading: false,
                         refreshing: false
@@ -46,13 +46,13 @@ class GroupView extends Component {
                 .catch(error => {
                     this.setState({ error, loading: false });
                 });
-        }, 1500);
+
     };
 
     handleRefresh = () => {
         this.setState(
             {
-                page: 1,
+                offset: 0,
                 refreshing: true
             },
             () => {
@@ -62,21 +62,19 @@ class GroupView extends Component {
     };
 
     handleLoadMore = () => {
-        if (!this.state.loading) {
             this.setState(
                 {
-                    page: this.state.page + 1,
-                    loading: true
+                    offset: this.state.data.length,
+                    loading: true,
                 },
                 () => {
                     this.makeRemoteRequest();
                 }
             );
-        }
     };
 
     sendComment = () => {
-        fetch('http://192.168.42.72:8080/comments/addComment', {
+        fetch(`${this.props.auth.hostname}/comments/addComment`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -84,8 +82,6 @@ class GroupView extends Component {
             },
             body: JSON.stringify({
                 content: this.state.txtCmt,
-                time: 1497694444000,
-                userID: 'HS001',
                 idTopic: this.props.navigation.state.params.item.idTopic
             })
         }).then(this.setState({ txtCmt: '' }));
@@ -113,6 +109,7 @@ class GroupView extends Component {
                         <CommentItem
                             userName={item.userID}
                             cmt={item.content}
+                            time={item.time}
                         />
                     )}
                     keyExtractor={item => item.idCmt}
@@ -120,7 +117,7 @@ class GroupView extends Component {
                     onRefresh={this.handleRefresh}
                     refreshing={this.state.refreshing}
                     onEndReached={this.handleLoadMore}
-                    onEndReachedThreshold={-0.1}
+                    onEndReachedThreshold={0.2}
                 />
                 <View style={style.cmtview}>
                     <TextInput

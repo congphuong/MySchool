@@ -1,29 +1,62 @@
 import React, { Component } from 'react';
 import { StyleSheet, View, ScrollView, Text } from 'react-native';
+import {connect} from 'react-redux';
 import Timeline from 'react-native-timeline-listview';
 
 import DrawerButton from './DrawerButton';
 
-export default class ExamSchedule extends Component {
+class ExamSchedule extends Component {
     static navigationOptions = ({ navigation }) => ({
         headerTitle: 'ExamSchedule',
         headerLeft: <DrawerButton navigation={navigation} />,
     });
-    constructor() {
-        super();
-        this.data = [
-            { time: '09:00', title: 'Toan', description: 'Event 1 Description' },
-            { time: '12:00', title: 'Vat Li', description: 'Event 3 Description' },
-            { time: '16:30', title: 'Sinh hoc', description: 'Event 5 Description' },
-        ];
+    constructor(props) {
+        super(props);
+        this.state = {
+            loading: false,
+            data: [],
+            page: 1,
+            id: 1,
+            error: null,
+            refreshing: false,
+        };
     }
+    componentDidMount() {
+        this.makeRemoteRequest();
+    }
+    makeRemoteRequest = () => {
+        const url = `${this.props.auth.hostname}/viewTestSchedule/1/1`;
+        this.setState({loading: true});
+
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': this.props.auth.user.token
+            }
+        })
+            .then(res => res.json())
+            .then(res => {
+                const data = [];
+                this.setState((state)=>{
+                    res.forEach(function(item, index, array) {
+                        const date = new Date(item.testDay);
+                        data.push({time: 'ngày ' + date.getDate() + '/' + date.getMonth(), title: item.nameSubject, description: 'tiết ' +item.startLesson + ' thời gian: ' +item.testTime + ' tại lớp: ' + item.nameClass});
+                    });
+                    return {data}
+                });
+            })
+            .catch(error => {
+                this.setState({error, loading: false});
+            });
+
+    };
     render() {
         return (
             <ScrollView style={style.content}>
                 <View style={style.card}>
                     <Text style={style.title}>Lịch thi</Text>
                     <Timeline
-                        data={this.data}
+                        data={this.state.data}
                         titleStyle={{ marginTop: -12 }}
                         separator={false}
                         innerCircle={'dot'}
@@ -58,3 +91,7 @@ const style = StyleSheet.create(
         }
     }
 );
+const mapStateToProps = state => ({
+    auth: state.auth,
+});
+export default connect(mapStateToProps)(ExamSchedule);
