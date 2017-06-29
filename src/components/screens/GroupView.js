@@ -91,7 +91,7 @@ class GroupView extends Component {
         return (
             <View
                 style={{
-                    height: 1,
+                    height: 0.5,
                     backgroundColor: '#CED0CE',
                     marginLeft: 10,
                     marginRight: 10
@@ -121,7 +121,7 @@ class GroupView extends Component {
                 />
                 <View style={style.cmtview}>
                     <TextInput
-                        style={{ height: 40, flex: 1, borderTopWidth: 1, borderColor: 'gray' }}
+                        style={{ height: 40, flex: 1, borderTopWidth: 1, borderColor: 'gray' , padding:5}}
                         onChangeText={(txtCmt) => this.setState({ txtCmt })}
                         value={this.state.txtCmt}
                         placeholder='Nhap noi dung comment!'

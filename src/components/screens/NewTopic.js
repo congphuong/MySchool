@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, TextInput } from 'react-native';
 import { connect } from 'react-redux';
+import {NavigationActions} from 'react-navigation';
 
 class NewTopic extends Component {
     static navigationOptions = ({ navigation }) => ({
         title: 'New Topic',
-        headerRight: <TouchableOpacity style={style.btTao} onPress={this.newTopic} ><Text style={{ color: 'blue', fontSize: 18 }}>post</Text></TouchableOpacity>,
+        headerRight: <TouchableOpacity style={style.btTao} onPress={()=>navigation.state.params.postTopic1()} ><Text style={{ color: 'blue', fontSize: 18 }}>post</Text></TouchableOpacity>,
     });
 
     constructor(props) {
@@ -15,6 +16,27 @@ class NewTopic extends Component {
             title: '',
             content: ''
         };
+    }
+
+    postTopic = () => {
+        fetch(`${this.props.auth.hostname}/topics/createTopic`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': this.props.auth.user.token
+            },
+            body: JSON.stringify({
+                userID: this.props.auth.user.username,
+                idClass: this.props.auth.user.idClass,
+                content: this.state.content,
+                idTopic: this.props.auth.user.idClass,
+                topicName: this.state.title
+            })
+        }).then(()=>{this.setState({title:''});
+            this.props.navigation.dispatch(NavigationActions.back());});
+    };
+    componentDidMount() {
+        this.props.navigation.setParams({ postTopic1: this.postTopic });
     }
 
     render() {

@@ -1,5 +1,6 @@
 import { } from 'react-native';
 import { TabNavigator } from 'react-navigation';
+import {connect} from 'react-redux';
 import TabHome from './navigations/TabHome';
 import TabGroup from './navigations/TabGroup';
 import TabNotif from './navigations/TabNotif';
@@ -35,3 +36,4 @@ const MainTabNavigator = TabNavigator({
     });
 
 export default MainTabNavigator;
+

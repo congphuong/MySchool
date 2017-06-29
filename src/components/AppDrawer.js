@@ -9,7 +9,7 @@ import DrawerContent from './DrawerContent';
 
 const AppDrawer = DrawerNavigator({
     MainTabNavigator: {
-        screen: MainTabNavigator,
+        screen: MainTabNavigator ,
         navigationOptions: {
             title: 'Home',
             drawerIcon: ({ tintColor }) => (

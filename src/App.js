@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import { addNavigationHelpers } from 'react-navigation';
-import { StatusBar, View } from 'react-native';
+import { StatusBar, View, Platform } from 'react-native';
 import { connect } from 'react-redux';
-import PushController from './components/fcm/PushController';
 import AppNavigator from './components/AppNavigator';
 
 
@@ -13,6 +12,9 @@ class App extends Component {
         this.state = {
             token: ''
         };
+    }
+    componentDidMount() {
+        this.sendToken();
     }
     render() {
         return (
@@ -27,14 +29,33 @@ class App extends Component {
                         state: this.props.nav
                     })}
                 />
-                
+                {(Platform.os === 'android')?<PushController onChangeToken={token => this._onChangeToken(token) }/>:null}
             </View>
         );
     }
+    _onChangeToken = (token) => {
+        this.setState({ token: token || '' });
+        this.sendToken();
+    }
+    sendToken = () => {
+        if(this.props.auth.user.username && this.state.token !== '') {
+            fetch(`${this.props.auth.hostname}/updateToken`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: this.props.auth.user.username,
+                    token: this.state.token
+                })
+            }).then();
+        }
+    };
 }
 
 const mapStateToProps = state => ({
     nav: state.nav,
+    auth: state.auth
 });
 
 export default connect(mapStateToProps)(App);

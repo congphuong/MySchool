@@ -1,16 +1,14 @@
 import React, {Component} from 'react';
-import {View, StyleSheet, FlatList, TouchableOpacity, Text} from 'react-native';
+import {View, StyleSheet, FlatList, TouchableOpacity, Text, Image, LayoutAnimation} from 'react-native';
 import {connect} from 'react-redux';
 import DrawerButton from './DrawerButton';
 import NotificationItem from './NotificationItem';
+import ActionButton from 'react-native-action-button';
 
 class Notification extends Component {
     static navigationOptions = ({navigation}) => ({
         title: 'Notification',
         headerLeft: <DrawerButton navigation={navigation}/>,
-        headerRight: <TouchableOpacity onPress={() => {
-            navigation.navigate('NewNotification');
-        }} style={style.btTao}><Text style={{color: 'blue', fontSize: 18}}>new</Text></TouchableOpacity>,
     });
 
     constructor(props) {
@@ -24,6 +22,8 @@ class Notification extends Component {
             id: 1,
             error: null,
             refreshing: false,
+            chucvu: this.props.auth.user.chucvu === 'GIAOVIEN',
+            isActionButtonVisible: true
         };
     }
 
@@ -70,7 +70,7 @@ class Notification extends Component {
 
     handleLoadMore = () => {
 
-            const id = this.state.data[this.state.data.length - 1].id;
+        const id = this.state.data[this.state.data.length - 1].id;
 
         this.setState(
             {
@@ -115,11 +115,37 @@ class Notification extends Component {
                     refreshing={this.state.refreshing}
                     onEndReached={this.handleLoadMore}
                     onEndReachedThreshold={0.2}
+                    onScroll={this.onScroll}
                 />
+                {this.state.isActionButtonVisible && this.state.chucvu ? <ActionButton hideShadow buttonColor="#3498db"
+                                                                  onPress={() => navigation.navigate('NewNotification')}/> : null}
             </View>
         );
     }
 
+    _listViewOffset = 0;
+    onScroll = (event) => {
+        // Simple fade-in / fade-out animation
+        const CustomLayoutLinear = {
+            duration: 100,
+            create: {type: LayoutAnimation.Types.linear, property: LayoutAnimation.Properties.opacity},
+            update: {type: LayoutAnimation.Types.linear, property: LayoutAnimation.Properties.opacity},
+            delete: {type: LayoutAnimation.Types.linear, property: LayoutAnimation.Properties.opacity}
+        }
+        // Check if the user is scrolling up or down by confronting the new scroll position with your own one
+        const currentOffset = event.nativeEvent.contentOffset.y
+        const direction = (currentOffset > 0 && currentOffset > this._listViewOffset)
+            ? 'down'
+            : 'up'
+        // If the user is scrolling down (and the action-button is still visible) hide it
+        const isActionButtonVisible = direction === 'up'
+        if (isActionButtonVisible !== this.state.isActionButtonVisible) {
+            LayoutAnimation.configureNext(CustomLayoutLinear)
+            this.setState({isActionButtonVisible})
+        }
+        // Update your scroll position
+        this._listViewOffset = currentOffset
+    }
 
 }
 
@@ -131,7 +157,12 @@ const style = StyleSheet.create(
         },
         btTao: {
             marginRight: 15
-        }
+        },
+        actionButtonIcon: {
+            fontSize: 20,
+            height: 22,
+            color: 'white',
+        },
     }
 );
 const mapStateToProps = state => ({

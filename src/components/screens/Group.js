@@ -16,8 +16,7 @@ class Group extends Component {
         this.state = {
             loading: false,
             data: [],
-            page: 1,
-            id: 1,
+            maxid: 0,
             error: null,
             refreshing: false,
         };
@@ -34,32 +33,44 @@ class Group extends Component {
     }
 
     makeRemoteRequest = () => {
-        const { page, id } = this.state;
-        const url = `${this.props.auth.hostname}/topics/getByClass/${id}`;
-        this.setState({ loading: true });
-        fetch(url, {
-            method: 'GET',
-            headers: {
-                'Authorization': this.props.auth.user.token
-            }, })
-            .then(res => res.json())
-            .then(res => {
-                this.setState({
-                    data: page === 1 ? res : [...this.state.data, ...res],
-                    error: res.error || null,
-                    loading: false,
-                    refreshing: false
-                });
+        const { maxid} = this.state;
+        let idClass = 0;
+        if(this.props.auth.user.chucvu === 'PHUHUYNH'){
+            (this.props.auth.selectedStudent)?
+            idClass = this.props.auth.selectedStudent.idClass : 0;
+        } else {
+            idClass = this.props.auth.user.idClass
+        }
+        if(idClass != 0) {
+            const url = `${this.props.auth.hostname}/topics/getByClass/${idClass}/${maxid}/10`;
+            this.setState({loading: true});
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': this.props.auth.user.token
+                },
             })
-            .catch(error => {
-                this.setState({ error, loading: false });
-            });
+                .then(res => res.json())
+                .then(res => {
+                    this.setState({
+                        data: maxid === 0 ? res : [...this.state.data, ...res],
+                        error: res.error || null,
+                        loading: false,
+                        refreshing: false
+                    });
+                })
+                .catch(error => {
+                    this.setState({error, loading: false});
+                });
+        }else {
+            this.setState({refreshing: false})
+        }
     };
 
     handleRefresh = () => {
         this.setState(
             {
-                page: 1,
+                maxid: 0,
                 refreshing: true
             },
             () => {
@@ -69,9 +80,14 @@ class Group extends Component {
     };
 
     handleLoadMore = () => {
+        let id = 0;
+        if(this.state.data[this.state.data.length - 1]) {
+            id = this.state.data[this.state.data.length - 1].idTopic;
+        }
         this.setState(
             {
-                page: this.state.page + 1
+                maxid: id,
+                loading: true
             },
             () => {
                 this.makeRemoteRequest();
@@ -79,11 +95,13 @@ class Group extends Component {
         );
     };
 
+
+
     renderSeparator = () => {
         return (
             <View
                 style={{
-                    height: 1,
+                    height: 0.5,
                     backgroundColor: '#CED0CE',
                     marginLeft: 10,
                     marginRight: 10
@@ -102,6 +120,9 @@ class Group extends Component {
                         <TopicItem
                             title={`${item.topicName}`}
                             name={item.userID}
+                            cmtCount={item.numCMT}
+                            time={item.time}
+                            content={item.content}
                             onpress={() => { navigation.navigate('Comment', { item }); }}
                         />
                     )}
@@ -109,6 +130,8 @@ class Group extends Component {
                     ItemSeparatorComponent={this.renderSeparator}
                     onRefresh={this.handleRefresh}
                     refreshing={this.state.refreshing}
+                    onEndReached={this.handleLoadMore}
+                    onEndReachedThreshold={0.2}
                 />
             </View>
         );

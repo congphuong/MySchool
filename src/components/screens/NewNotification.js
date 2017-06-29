@@ -14,11 +14,12 @@ import {
 import {connect} from 'react-redux';
 import CheckBox from './checkbox/Checkbox';
 import SelectItem from './SelectItem';
+import {NavigationActions} from 'react-navigation';
 
 class NewNotification extends Component {
     static navigationOptions = ({navigation}) => ({
         title: 'New Notification',
-        headerRight: <TouchableOpacity style={style.btTao} onPress={this.newTopic}><Text
+        headerRight: <TouchableOpacity onPress={() => navigation.state.params.sendNoti()} style={style.btTao}><Text
             style={{color: 'blue', fontSize: 18}}>post</Text></TouchableOpacity>,
     });
 
@@ -31,11 +32,12 @@ class NewNotification extends Component {
             modalVisible: false,
             modalPicker: false,
             checked: false,
-            language: '',
+            idClass: 0,
             btToggle: true,
             loading: false,
             data1: [],
             data2: [],
+            data3: [],
             page: 1,
             seed: 1,
             error: null,
@@ -44,14 +46,37 @@ class NewNotification extends Component {
         };
     }
 
+    sendNotification = () => {
+        let reciever = [];
+        for (var key of this.state.selected.keys()) {
+            reciever.push(key)
+        }
+        fetch(`${this.props.auth.hostname}/notification/group`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': this.props.auth.user.token
+            },
+            body: JSON.stringify({
+                sender: this.props.auth.user.username,
+                receiver: reciever,
+                title: this.state.title,
+                noti: this.state.content
+            })
+        }).then(() => {
+                this.setState({title: ''});
+                this.props.navigation.dispatch(NavigationActions.back());
+            }
+        );
+    };
     onPressItem = (id: string) => {
         // updater functions are preferred for transactional updates
         this.setState((state) => {
             // copy the map rather than modifying state.
             const selected = new Map(state.selected);
-            if(selected.get(id)){
+            if (selected.get(id)) {
                 selected.delete(id);
-            }else{
+            } else {
                 selected.set(id, !selected.get(id)); // toggle
             }
             return {selected};
@@ -67,6 +92,8 @@ class NewNotification extends Component {
     );
 
     componentDidMount() {
+        this.props.navigation.setParams({sendNoti: this.sendNotification});
+        this.makeClassRequest();
         this.makeStudentRequest();
         this.makeParentRequest();
     }
@@ -77,6 +104,8 @@ class NewNotification extends Component {
 
     setModalPicker(visible) {
         this.setState({modalPicker: visible});
+        this.makeStudentRequest();
+        this.makeParentRequest();
     }
 
     setBtToggle(sel) {
@@ -97,14 +126,22 @@ class NewNotification extends Component {
                 >
                     <View style={{marginTop: 22, flex: 1}}>
                         <View style={{flex: 1}}>
-                            <View style={{alignItems:'flex-end'}}>
+                            <View style={{alignItems: 'flex-end'}}>
                                 <TouchableHighlight underlayColor='rgba(80,94,104,0.7)' onPress={() => {
                                     this.setModalVisible(!this.state.modalVisible)
-                                }} style={{marginRight:20, marginTop:7, padding:10,paddingTop:5, paddingBottom:5,borderWidth:1, borderRadius:10, borderColor:'gray'}}>
+                                }} style={{
+                                    marginRight: 20,
+                                    marginTop: 7,
+                                    padding: 10,
+                                    paddingTop: 5,
+                                    paddingBottom: 5,
+                                    borderWidth: 1,
+                                    borderRadius: 10,
+                                    borderColor: 'gray'
+                                }}>
                                     <Text>Xong</Text>
                                 </TouchableHighlight>
                             </View>
-
 
                             <View style={{
                                 flexDirection: 'row',
@@ -166,19 +203,18 @@ class NewNotification extends Component {
                             >
                                 <View style={style.modelPickerContainer}>
                                     <View style={{width: deviceWidth - 40, height: 300, backgroundColor: 'white'}}>
-                                        <View style={{flexDirection:'row',alignItems: 'flex-end'}}>
+                                        <View style={{flexDirection: 'row', alignItems: 'flex-end'}}>
                                             <TouchableHighlight onPress={() => {
                                                 this.setModalPicker(!this.state.modalPicker)
-                                            }} style={{width:100}} >
+                                            }} style={{width: 100}}>
                                                 <Text>Hide Modal</Text>
                                             </TouchableHighlight>
                                         </View>
 
                                         <Picker
-                                            selectedValue={this.state.language}
-                                            onValueChange={(itemValue, itemIndex) => this.setState({language: itemValue})}>
-                                            <Picker.Item label="Java" value="java"/>
-                                            <Picker.Item label="JavaScript" value="js"/>
+                                            selectedValue={this.state.idClass}
+                                            onValueChange={(itemValue, itemIndex) => this.setState({idClass: itemValue})}>
+                                            { this.renderClass() }
                                         </Picker>
                                     </View>
                                 </View>
@@ -188,7 +224,8 @@ class NewNotification extends Component {
                 </Modal>
                 <TouchableOpacity onPress={() => {
                     this.setModalVisible(true);
-                }} style={{padding: 10,borderWidth:1, borderRadius:10, borderColor:'gray', marginBottom: 15}} ><Text>Người nhận ({this.state.selected.size})</Text></TouchableOpacity>
+                }} style={{padding: 10, borderWidth: 1, borderRadius: 10, borderColor: 'gray', marginBottom: 15}}><Text>Người
+                    nhận ({this.state.selected.size})</Text></TouchableOpacity>
                 <TextInput
                     style={{height: 40, borderWidth: 1, borderColor: 'gray', marginBottom: 10, padding: 5}}
                     onChangeText={(title) => this.setState({title})}
@@ -207,32 +244,67 @@ class NewNotification extends Component {
         );
     }
 
+    renderClass = () => {
+        let obj = [];
+        for (let item of this.state.data3) {
+            obj.push(<Picker.Item label={item.nameClass} value={item.idClass}/>)
+        }
+        return (obj);
+    }
+
     makeStudentRequest = () => {
         const {page, seed} = this.state;
-        const url = `${this.props.auth.hostname}/studentsbyclass/1`;
-        this.setState({loading: true});
-        fetch(url, {
-            method: 'GET',
-            headers: {
-                'Authorization': this.props.auth.user.token
-            }
-        })
-            .then(res => res.json())
-            .then(res => {
-                this.setState({
-                    data1: page === 1 ? res : [...this.state.data1, ...res],
-                    error: res.error || null,
-                    loading: false,
-                    refreshing: false
-                });
+        if (this.state.idClass != 0) {
+            const url = `${this.props.auth.hostname}/studentsbyclass/${this.state.idClass}`;
+            this.setState({loading: true});
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': this.props.auth.user.token
+                }
             })
-            .catch(error => {
-                this.setState({error, loading: false});
-            });
+                .then(res => res.json())
+                .then(res => {
+                    this.setState({
+                        data1: res,
+                        error: res.error || null,
+                        loading: false,
+                        refreshing: false
+                    });
+                })
+                .catch(error => {
+                    this.setState({error, loading: false});
+                });
+        }
     };
     makeParentRequest = () => {
         const {page, seed} = this.state;
-        const url = `${this.props.auth.hostname}/viewListParents/1`;
+        if (this.state.idClass != 0) {
+            const url = `${this.props.auth.hostname}/viewListParents/${this.state.idClass}`;
+            this.setState({loading: true});
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': this.props.auth.user.token
+                }
+            })
+                .then(res => res.json())
+                .then(res => {
+                    this.setState({
+                        data2: res,
+                        error: res.error || null,
+                        loading: false,
+                        refreshing: false
+                    });
+                })
+                .catch(error => {
+                    this.setState({error, loading: false});
+                });
+        }
+    };
+    makeClassRequest = () => {
+        const {page, seed} = this.state;
+        const url = `${this.props.auth.hostname}/getClassTeach/${this.props.auth.user.machucvu}`;
         this.setState({loading: true});
         fetch(url, {
             method: 'GET',
@@ -243,7 +315,7 @@ class NewNotification extends Component {
             .then(res => res.json())
             .then(res => {
                 this.setState({
-                    data2: page === 1 ? res : [...this.state.data2, ...res],
+                    data3: res,
                     error: res.error || null,
                     loading: false,
                     refreshing: false
@@ -253,6 +325,7 @@ class NewNotification extends Component {
                 this.setState({error, loading: false});
             });
     };
+
 
 }
 const style = StyleSheet.create(

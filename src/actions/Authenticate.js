@@ -1,5 +1,5 @@
 import { NavigationActions } from 'react-navigation';
-import { LOGIN, LOGOUT } from './Types';
+import { LOGIN, LOGOUT, UPDATE} from './Types';
 
 export const loginSuccess = (user) => {
     return (dispatch) => {
@@ -35,5 +35,14 @@ export const logout = () => {
             ],
         });
         dispatch(resetNavigator);
+    };
+};
+
+export const update = (user) => {
+    return (dispatch) => {
+        dispatch({
+            type: UPDATE,
+            payload: user
+        });
     };
 };

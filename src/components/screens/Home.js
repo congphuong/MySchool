@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, ScrollView, View } from 'react-native';
+import { connect } from 'react-redux';
 import Timeline from 'react-native-timeline-listview';
 import DrawerButton from './DrawerButton';
 
@@ -12,30 +13,60 @@ class Home extends Component {
     constructor() {
         super();
         this.state = {
-            data: [
-                { time: 'tiết 1', title: 'Toan', description: 'Event 1 Description' },
-                { time: 'tiết 2', title: 'Event 2', description: 'Event 2 Description' },
-                { time: 'tiết 3', title: 'Vat Li', description: 'Event 3 Description' },
-                { time: 'tiết 4', title: 'Van', description: 'Event 4 Description' },
-                { time: 'tiết 5', title: 'Sinh hoc', description: 'Event 5 Description' },
-                { time: 'tiết 6', title: 'Event 1', description: 'Event 1 Description' },
-                { time: 'tiết 7', title: 'Event 2', description: 'Event 2 Description' },
-                { time: 'tiết 8', title: 'Event 3', description: 'Event 3 Description' },
-                { time: 'tiết 9', title: 'Event 4', description: 'Event 4 Description' },
-                { time: 'tiết 10', title: 'Event 5', description: 'Event 5 Description' }
-            ],
-            data2: [
-                { time: '09:00', title: 'Toan', description: 'Event 1 Description' },
-                { time: '12:00', title: 'Vat Li', description: 'Event 3 Description' },
-                { time: '16:30', title: 'Sinh hoc', description: 'Event 5 Description' },
-            ]
+            data: [],
+            data2: [],
+            user: {}
         };
     }
+
+    componentWillMount() {
+        this.makeRemoteRequest();
+    }
+
+    makeRemoteRequest = () => {
+        const day = new Date(Date.now());
+        let idClass = 0;
+        if(this.props.auth.user.chucvu === 'PHUHUYNH'){
+            (this.props.auth.selectedStudent)?
+                idClass = this.props.auth.selectedStudent.idClass : 0;
+        } else {
+            idClass = this.props.auth.user.idClass
+        }
+        const url = `${this.props.auth.hostname}/viewSchedule/${idClass}/1/${day.getDay()+1}`;
+        this.setState({loading: true});
+
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': this.props.auth.user.token
+            }
+        })
+            .then(res => res.json())
+            .then(res => {
+                const data = [];
+                this.setState((state)=>{
+                    res.forEach(function(item, index, array) {
+                        data.push({time: 'tiết ' + item.lesson, title: item.nameSubject, description: item.idTeacher});
+                    });
+                    return {data}
+                });
+            })
+            .catch(error => {
+                this.setState({error, loading: false});
+            });
+
+    };
+
+    componentDidMount() {
+
+    }
+
     render() {
+        const day = new Date(Date.now());
         return (
             <ScrollView style={style.content}>
                 <View style={style.card}>
-                    <Text style={style.title}>Thời khóa biểu</Text>
+                    <Text style={style.title}>Thời khóa biểu thứ {day.getDay()+1}</Text>
                     
                     <Timeline
                         data={this.state.data}
@@ -85,4 +116,8 @@ const style = StyleSheet.create(
         }
     }
 );
-export default Home;
+
+const mapStateToProps = state => ({
+    auth: state.auth,
+});
+export default connect(mapStateToProps)(Home);

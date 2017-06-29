@@ -1,4 +1,4 @@
-import { LOGIN, LOGOUT } from '../actions/Types';
+import { LOGIN, LOGOUT, UPDATE } from '../actions/Types';
 
 const INITIAL = {
     loggedIn: false,
@@ -12,6 +12,8 @@ export default (state = INITIAL, action) => {
             return { loggedIn: true, user: action.payload, hostname: 'http://localhost:8080'};
         case LOGOUT:
             return INITIAL;
+        case UPDATE:
+            return {...state, selectedStudent: action.payload};
         default:
             return state;
     }
