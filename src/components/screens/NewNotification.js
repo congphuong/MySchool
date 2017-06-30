@@ -151,7 +151,7 @@ class NewNotification extends Component {
                             }}>
                                 <TouchableOpacity onPress={() => {
                                     this.setModalPicker(true);
-                                }}><Text>Chon lop {this.state.selected.size}</Text></TouchableOpacity>
+                                }}><Text>Chọn lớp</Text></TouchableOpacity>
                                 <View style={{flexDirection: 'row'}}>
                                     <TouchableHighlight onPress={() => {
                                         this.setBtToggle(true)
@@ -207,7 +207,7 @@ class NewNotification extends Component {
                                             <TouchableHighlight onPress={() => {
                                                 this.setModalPicker(!this.state.modalPicker)
                                             }} style={{width: 100}}>
-                                                <Text>Hide Modal</Text>
+                                                <Text>Xong</Text>
                                             </TouchableHighlight>
                                         </View>
 

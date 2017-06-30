@@ -32,7 +32,7 @@ class Home extends Component {
         } else {
             idClass = this.props.auth.user.idClass
         }
-        const url = `${this.props.auth.hostname}/viewSchedule/${idClass}/1/${day.getDay()+1}`;
+        const url = `${this.props.auth.hostname}/viewSchedule/${idClass}/1/2`;
         this.setState({loading: true});
 
         fetch(url, {
@@ -67,7 +67,6 @@ class Home extends Component {
             <ScrollView style={style.content}>
                 <View style={style.card}>
                     <Text style={style.title}>Thời khóa biểu thứ {day.getDay()+1}</Text>
-                    
                     <Timeline
                         data={this.state.data}
                         titleStyle={{ marginTop: -12 }}
@@ -77,6 +76,7 @@ class Home extends Component {
                         lineColor={'gray'}
                         circleColor={'gray'}
                     />
+                    {(this.state.data.length <1)?<Text>Không có thời khoá biểu</Text>:null}
                 </View>
                 <View style={style.card}>
                     <Text style={style.title}>Lịch thi</Text>
@@ -89,6 +89,7 @@ class Home extends Component {
                         lineColor={'red'}
                         circleColor={'red'}
                     />
+                    {(this.state.data2.length <1)?<Text>Chưa có lịch thi</Text>:null}
                 </View>
             </ScrollView>
         );

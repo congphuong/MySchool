@@ -3,6 +3,7 @@ import { addNavigationHelpers } from 'react-navigation';
 import { StatusBar, View, Platform } from 'react-native';
 import { connect } from 'react-redux';
 import AppNavigator from './components/AppNavigator';
+import PushController from './components/fcm/PushController';
 
 
 class App extends Component {
@@ -29,7 +30,7 @@ class App extends Component {
                         state: this.props.nav
                     })}
                 />
-                {(Platform.os === 'android')?<PushController onChangeToken={token => this._onChangeToken(token) }/>:null}
+                {(Platform.OS === 'android')?<PushController onChangeToken={token => this._onChangeToken(token) }/>:null}
             </View>
         );
     }

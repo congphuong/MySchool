@@ -25,30 +25,49 @@ class ExamSchedule extends Component {
         this.makeRemoteRequest();
     }
     makeRemoteRequest = () => {
-        const url = `${this.props.auth.hostname}/viewTestSchedule/1/1`;
-        this.setState({loading: true});
+        let idClass = 0;
+        let url = '';
+        if(this.props.auth.user.chucvu === 'PHUHUYNH'){
+            (this.props.auth.selectedStudent)?
+                idClass = this.props.auth.selectedStudent.idClass : 0;
+            url = `${this.props.auth.hostname}/viewTestSchedule/1/${idClass}`;
+        }
+        if(this.props.auth.user.chucvu === 'GIAOVIEN'){
+            url = `${this.props.auth.hostname}/viewTestSchedule/1/${this.props.auth.machucvu}`;
+        }
+        if(this.props.auth.user.chucvu === 'HOCSINH'){
+            idClass = this.props.auth.user.idClass;
+            url = `${this.props.auth.hostname}/viewTestSchedule/1/${idClass}`;
+        }
 
-        fetch(url, {
-            method: 'GET',
-            headers: {
-                'Authorization': this.props.auth.user.token
-            }
-        })
-            .then(res => res.json())
-            .then(res => {
-                const data = [];
-                this.setState((state)=>{
-                    res.forEach(function(item, index, array) {
-                        const date = new Date(item.testDay);
-                        data.push({time: 'ngày ' + date.getDate() + '/' + date.getMonth(), title: item.nameSubject, description: 'tiết ' +item.startLesson + ' thời gian: ' +item.testTime + ' tại lớp: ' + item.nameClass});
-                    });
-                    return {data}
-                });
+        if(url !== '') {
+            this.setState({loading: true});
+
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': this.props.auth.user.token
+                }
             })
-            .catch(error => {
-                this.setState({error, loading: false});
-            });
-
+                .then(res => res.json())
+                .then(res => {
+                    const data = [];
+                    this.setState((state) => {
+                        res.forEach(function (item, index, array) {
+                            const date = new Date(item.testDay);
+                            data.push({
+                                time: 'ngày ' + date.getDate() + '/' + date.getMonth(),
+                                title: item.nameSubject,
+                                description: 'tiết ' + item.startLesson + ' thời gian: ' + item.testTime + ' tại lớp: ' + item.nameClass
+                            });
+                        });
+                        return {data}
+                    });
+                })
+                .catch(error => {
+                    this.setState({error, loading: false});
+                });
+        }
     };
     render() {
         return (
@@ -59,8 +78,7 @@ class ExamSchedule extends Component {
                         data={this.state.data}
                         titleStyle={{ marginTop: -12 }}
                         separator={false}
-                        innerCircle={'dot'}
-                        circleSize={12}
+                        circleSize={10}
                         lineColor={'red'}
                         circleColor={'red'}
                     />

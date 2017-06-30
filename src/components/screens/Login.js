@@ -131,18 +131,18 @@ class Login extends Component {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    userName: this.state.username,
-                    password: this.state.passwd,
+                    userName: this.state.rusername,
+                    password: this.state.rpasswd,
                     verifyCode: this.state.code
                 })
             }).then((response) => response.json())
                 .then((responseJson) => {
                     console.log(responseJson);
-                    if (responseJson) {
+                    if (responseJson.success === true) {
                         this.toggle(false);
                         this.setState({error: 'Dang ky thanh cong!'});
                     } else {
-                        this.setState({error: 'Sai thong tin dang nhap!'});
+                        this.setState({error: 'Sai thong tin dang ky!'});
                     }
                 })
                 .catch((error) => {
@@ -223,7 +223,7 @@ class Login extends Component {
                         </View>
                         <Text> {this.state.error} </Text>
                     </View> :
-                    <View >
+                    <View>
                         <Text>Resgister screen</Text>
                         <TextInput
                             style={{height: 40, borderColor: 'gray', borderWidth: 1, padding: 5, marginTop: 20}}
@@ -242,12 +242,11 @@ class Login extends Component {
                             style={{height: 40, borderColor: 'gray', borderWidth: 1, marginTop: 15, padding: 5}}
                             onChangeText={(code) => this.setState({code})}
                             value={this.state.code}
-                            secureTextEntry
                             placeholder='Code'
                         />
                         <View style={{flexDirection: 'row'}}>
                             <TouchableOpacity
-                                onPress={this.onReg()}
+                                onPress={()=>this.onReg()}
                                 style={{
                                     margin: 10,
                                     padding: 10,

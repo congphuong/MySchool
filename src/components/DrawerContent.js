@@ -52,7 +52,7 @@ class DrawerContent extends Component {
                     </TouchableOpacity>:null:null}
                 </View>
                 <View/>
-                {(this.state.toggle === false) ? <DrawerItems {...this.props.menu} /> : <ScrollView style={{flex:1}}>
+                {(this.state.toggle === false) ? <DrawerItems {...this.props.menu} /> : <ScrollView style={{flex:1, padding:10}}>
                     {(this.props.auth.user)?(this.props.auth.user.students)?this.renderStudent(this.props.auth.user.students):null:null}
 
                 </ScrollView>}
@@ -64,14 +64,9 @@ class DrawerContent extends Component {
     renderStudent = (students) => {
         let obj = [];
         for (let std of students){
-           obj.push(<Text onPress={() =>{this._onPress(std)}}>{std.name}</Text>)
+            obj.push(<TouchableOpacity onPress={() =>{this._onPress(std)}}><Text>{std.name}</Text></TouchableOpacity>)
         }
         return(obj);
-    }
-    renderStudent1 = (students) => {
-        return(
-        <Text>hihi {students.length}</Text>
-        );
     }
     _onPress = (std) => {
             this.props.update(std);

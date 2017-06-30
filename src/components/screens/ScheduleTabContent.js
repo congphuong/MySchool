@@ -20,28 +20,49 @@ class ScheduleTabContent extends Component {
         this.makeRemoteRequest();
     }
     makeRemoteRequest = () => {
-        const url = `${this.props.auth.hostname}/viewSchedule/1/1/${this.props.day}`;
-        this.setState({loading: true});
+        let idClass = 0;
+        let url = '';
+        if(this.props.auth.user.chucvu === 'PHUHUYNH'){
+            (this.props.auth.selectedStudent)?
+                idClass = this.props.auth.selectedStudent.idClass : 0;
+            url = `${this.props.auth.hostname}/viewSchedule/1/${idClass}/${this.props.day}`;
+        }
+        if(this.props.auth.user.chucvu === 'GIAOVIEN'){
+            url = `${this.props.auth.hostname}/viewTeacherSchedule/${this.props.auth.user.machucvu}/1/${this.props.day}`;
+        }
+        if(this.props.auth.user.chucvu === 'HOCSINH'){
+            idClass = this.props.auth.user.idClass;
+            url = `${this.props.auth.hostname}/viewSchedule/1/${idClass}/${this.props.day}`;
+        }
+        if(url !== '') {
+            this.setState({loading: true});
 
-        fetch(url, {
-            method: 'GET',
-            headers: {
-                'Authorization': this.props.auth.user.token
-            }
-        })
-            .then(res => res.json())
-            .then(res => {
-                const data = [];
-                this.setState((state)=>{
-                    res.forEach(function(item, index, array) {
-                        data.push({time: 'tiết ' + item.lesson, title: item.nameSubject, description: item.idTeacher});
-                    });
-                    return {data}
-                });
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': this.props.auth.user.token
+                }
             })
-            .catch(error => {
-                this.setState({error, loading: false});
-            });
+                .then(res => res.json())
+                .then(res => {
+                    const data = [];
+                    this.setState((state) => {
+                        res.forEach(function (item, index, array) {
+                            data.push({
+                                time: 'tiết ' + item.lesson,
+                                title: item.nameSubject,
+                                description: item.idTeacher
+                            });
+                        });
+                        return {data}
+                    });
+                })
+                .catch(error => {
+                    this.setState({error, loading: false});
+                });
+        }else {
+            this.setState({error, loading: false});
+        }
 
     };
     render() {
